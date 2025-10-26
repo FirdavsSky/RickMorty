@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="character_image">Character Image</string>
+    <string name="alive">Alive</string>
+    <string name="human_male">Human | Male</string>
+    <string name="rick_sanchez">Rick Sanchez</string>
+</resources>
