@@ -1,6 +1,5 @@
 package com.example.characters.presentation.adapters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +13,7 @@ import com.example.characters.R
 import com.example.domain.model.CharacterModel
 
 class CharacterAdapter(
-    private val onItemClick: (CharacterModel) -> Unit
+    private val itemClickListener: CharacterViewHolder.ItemClickListener
 ) : PagingDataAdapter<CharacterModel, CharacterViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
@@ -24,9 +23,11 @@ class CharacterAdapter(
 
     override fun onBindViewHolder(holder: CharacterViewHolder, position: Int) {
         val item = getItem(position) ?: return
-        Log.d("onBindViewHolder", "onBindViewHolder: $item")
         holder.bind(item)
-        holder.itemView.setOnClickListener { onItemClick(item) }
+
+        holder.itemView.setOnClickListener {
+            itemClickListener.onItemClick(item)
+        }
     }
     companion object {
         val DIFF = object : DiffUtil.ItemCallback<CharacterModel>() {
@@ -52,4 +53,6 @@ class CharacterViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
             .centerCrop()
             .into(iv)
     }
+
+    fun interface ItemClickListener { fun onItemClick(character: CharacterModel) }
 }
