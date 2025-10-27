@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":feature:characters"))
     implementation(project(":feature:details"))
+    implementation(project(":common-ui"))
 
     implementation(libs.hilt.android)
     implementation(libs.androidx.appcompat)

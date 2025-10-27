@@ -37,7 +37,9 @@ class CharacterListViewModel @Inject constructor(
     fun submitIntent(intent: CharacterListIntent) = intentChannel.trySend(intent)
 
     private fun handleIntents() {
+
         viewModelScope.launch {
+
             intents.collect { intent ->
                 when (intent) {
                     is CharacterListIntent.Load -> loadCharacters()

@@ -1,5 +1,6 @@
 package com.example.characters.presentation.fragments
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -11,7 +12,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -26,6 +27,7 @@ import com.example.characters.presentation.adapters.CharacterAdapter
 import com.example.characters.presentation.adapters.LoadingStateAdapter
 import com.example.characters.presentation.intents.CharacterListIntent
 import com.example.characters.presentation.viewModels.CharacterListViewModel
+import com.example.extention.findViewById
 import com.google.android.material.appbar.MaterialToolbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -37,25 +39,29 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
 
     private val vm: CharacterListViewModel by viewModels()
 
+    private var characterNavigator: CharacterNavigator? = null
+
     private lateinit var adapter: CharacterAdapter
     private lateinit var swipe: SwipeRefreshLayout
     private lateinit var recycler: RecyclerView
-    private lateinit var progress: ProgressBar
+    private lateinit var progressBarMain: ProgressBar
     private lateinit var imageSearch: ImageView
     private lateinit var linearSearch: LinearLayout
     private lateinit var editText: EditText
     private lateinit var hideSearchButton: ImageButton
     private lateinit var toolbar: MaterialToolbar
+    private lateinit var informationView: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        swipe = view.findViewById(R.id.swipe)
-        recycler = view.findViewById(R.id.recycler)
-        progress = view.findViewById(R.id.progress)
-        imageSearch = view.findViewById(R.id.imageViewSearch)
-        linearSearch = view.findViewById(R.id.linearLayoutSearch)
-        editText = view.findViewById(R.id.editText)
-        hideSearchButton = view.findViewById(R.id.hideSearchButton)
-        toolbar = view.findViewById(R.id.toolbar)
+        swipe = findViewById(R.id.swipe)
+        recycler = findViewById(R.id.recycler)
+        progressBarMain = findViewById(R.id.progressBarMain)
+        imageSearch = findViewById(R.id.imageViewSearch)
+        linearSearch = findViewById(R.id.linearLayoutSearch)
+        editText = findViewById(R.id.editText)
+        hideSearchButton = findViewById(R.id.hideSearchButton)
+        toolbar = findViewById(R.id.toolbar)
+        informationView = findViewById(R.id.informationView)
 
         imageSearch.setOnClickListener(this)
         hideSearchButton.setOnClickListener(this)
@@ -66,7 +72,8 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         }
 
         adapter = CharacterAdapter { character ->
-            Toast.makeText(requireContext(), "Clicked: ${character.name}", Toast.LENGTH_SHORT).show()
+
+            characterNavigator?.openCharacterDetails(character.id)
         }
 
         recycler.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -75,20 +82,36 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
             footer = LoadingStateAdapter { adapter.retry() }
         )
 
-        // Подписка на состояние
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
                 vm.state.collectLatest { state ->
-                    progress.isVisible = state.isLoading
-                    state.pagingData?.let { pagingData ->
+
+                    progressBarMain.isVisible = state.isLoading
+                    recycler.isVisible = !state.isLoading
+
+                    state.pagingData.let { pagingData ->
                         Log.d("CharactersFragment", "Submitting new paging data")
                         adapter.submitData(pagingData)
+                    }
+
+                    val isEmpty = adapter.itemCount == 0
+                    informationView.isVisible = !state.isLoading && isEmpty
+                    recycler.isVisible = !isEmpty
+
+                    if (!state.error.isNullOrEmpty()) {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Ошибка")
+                            .setMessage(state.error)
+                            .setPositiveButton("Ок") { dialog, _ ->
+                                dialog.dismiss()
+                            }
+                            .show()
                     }
                 }
             }
         }
 
-        // Отправляем поиск при вводе текста (Enter)
         editText.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val query = v.text.toString()
@@ -136,4 +159,13 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(editText.windowToken, 0)
     }
+
+    fun  initCharacterNavigator(characterNavigator: CharacterNavigator): CharactersFragment{
+        this.characterNavigator = characterNavigator
+        return this@CharactersFragment
+    }
+}
+
+interface CharacterNavigator {
+    fun openCharacterDetails(characterId: Int)
 }

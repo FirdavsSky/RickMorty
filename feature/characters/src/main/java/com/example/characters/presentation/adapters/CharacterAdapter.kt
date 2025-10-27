@@ -1,19 +1,14 @@
 package com.example.characters.presentation.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.characters.R
 import com.example.domain.model.CharacterModel
 
 class CharacterAdapter(
-    private val itemClickListener: CharacterViewHolder.ItemClickListener
+    private val itemClickListener: ItemClickListener
 ) : PagingDataAdapter<CharacterModel, CharacterViewHolder>(DIFF) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
@@ -35,24 +30,7 @@ class CharacterAdapter(
             override fun areContentsTheSame(oldItem: CharacterModel, newItem: CharacterModel) = oldItem == newItem
         }
     }
-}
 
-class CharacterViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-    private val iv = itemView.findViewById<ImageView>(R.id.ivAvatar)
-    private val tvName = itemView.findViewById<TextView>(R.id.tvName)
-    private val tvMeta = itemView.findViewById<TextView>(R.id.tvMeta)
-    private val tvStatus = itemView.findViewById<TextView>(R.id.tvStatusBadge)
-
-    fun bind(c: CharacterModel) {
-        tvName.text = c.name
-        tvMeta.text = "${c.species} | ${c.gender}"
-        tvStatus.text = c.status
-        // Coil
-        Glide.with(iv.context)
-            .load(c.image)
-            .centerCrop()
-            .into(iv)
-    }
 
     fun interface ItemClickListener { fun onItemClick(character: CharacterModel) }
 }

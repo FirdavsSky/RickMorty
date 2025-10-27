@@ -136,8 +136,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <TextView
+                android:id="@+id/informationView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Персонажи не найдены"
+                android:textSize="16sp"
+                android:textColor="#000"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
+
+
             <ProgressBar
-                android:id="@+id/progress"
+                android:id="@+id/progressBarMain"
                 style="?android:attr/progressBarStyleLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -146,6 +158,7 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"

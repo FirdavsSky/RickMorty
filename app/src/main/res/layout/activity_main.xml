@@ -2,5 +2,4 @@
 <androidx.fragment.app.FragmentContainerView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:name="com.example.characters.presentation.fragments.CharactersFragment"
     android:layout_height="match_parent"/>

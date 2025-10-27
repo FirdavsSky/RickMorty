@@ -16,14 +16,28 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Аватар персонажа -->
-        <ImageView
-            android:id="@+id/ivAvatar"
+        <!-- FrameLayout для аватара и прогрессбара -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="140dp"
-            android:scaleType="centerCrop"
-            tools:src="@drawable/character_image"
-            android:contentDescription="@string/character_image" />
+            android:layout_height="140dp">
+
+            <ImageView
+                android:id="@+id/ivAvatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:contentDescription="@string/character_image"
+                tools:src="@drawable/character_image" />
+
+            <ProgressBar
+                android:id="@+id/progressBarItem"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
 
         <!-- Блок с именем и метаинформацией -->
         <LinearLayout
@@ -38,6 +52,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/rick_sanchez"
                 android:textSize="18sp"
+                android:lines="2"
                 android:textStyle="bold"
                 android:textColor="@android:color/black" />
 
@@ -46,6 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/human_male"
+                android:lines="2"
                 android:textSize="14sp"
                 android:textColor="@android:color/darker_gray" />
         </LinearLayout>
