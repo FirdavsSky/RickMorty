@@ -9,8 +9,6 @@ import com.example.data.remote.APILoggingInterceptor
 import com.example.data.remote.api.RickAndMortyApi
 import com.example.data.repository.CharactersRepositoryImpl
 import com.example.domain.repository.CharactersRepository
-import com.example.domain.usecase.GetCharacterByIdUseCase
-import com.example.domain.usecase.GetCharactersUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -89,14 +87,5 @@ object CharacterDataModule {
         return CharactersRepositoryImpl(api, db, mapper)
     }
 
-    // UseCases
-    @Provides
-    fun provideGetCharactersUseCase(repository: CharactersRepository): GetCharactersUseCase {
-        return GetCharactersUseCase(repository)
-    }
 
-    @Provides
-    fun provideGetCharacterByIdUseCase(repository: CharactersRepository): GetCharacterByIdUseCase {
-        return GetCharacterByIdUseCase(repository)
-    }
 }

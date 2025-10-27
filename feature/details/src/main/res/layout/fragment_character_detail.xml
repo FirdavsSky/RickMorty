@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fillViewport="true"
     android:background="@android:color/white"
     tools:context=".presentation.fragments.CharacterDetailFragment">
@@ -12,37 +13,57 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
+        android:layout_marginTop="50dp"
         android:gravity="center_horizontal">
 
-        <!-- Фото персонажа -->
-        <ImageView
-            android:id="@+id/ivCharacterImage"
+        <!-- Фото персонажа в CardView -->
+        <androidx.cardview.widget.CardView
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_marginBottom="16dp"
-            android:scaleType="centerCrop"
-            android:contentDescription="@string/character_image"
-            tools:src="@drawable/rick_morty_placeholder" />
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp">
 
-        <!-- Имя -->
+            <ProgressBar
+                android:id="@+id/progressBarItem"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/ivCharacterImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/character_image"
+                tools:src="@drawable/rick_morty_placeholder" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Имя персонажа -->
         <TextView
             android:id="@+id/tvName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
             android:layout_marginBottom="8dp"
             tools:text="Rick Sanchez" />
 
-        <!-- Статус -->
+        <!-- Статус персонажа как badge -->
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textColor="@color/status_alive"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
             android:layout_marginBottom="8dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_status_badge"
             tools:text="Alive" />
 
         <!-- Вид (Species) -->
@@ -63,5 +84,24 @@
             android:textSize="16sp"
             android:textColor="@android:color/darker_gray"
             tools:text="Male" />
+
+        <!-- Происхождение -->
+        <TextView
+            android:id="@+id/tvOrigin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginTop="12dp"
+            tools:text="Origin: Earth" />
+
+        <!-- Текущее местоположение -->
+        <TextView
+            android:id="@+id/tvLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/darker_gray"
+            tools:text="Location: Citadel of Ricks" />
     </LinearLayout>
 </ScrollView>

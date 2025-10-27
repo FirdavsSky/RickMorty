@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.DiffUtil
 import com.example.characters.R
 import com.example.domain.model.CharacterModel
 
-class CharacterAdapter(
-    private val itemClickListener: ItemClickListener
-) : PagingDataAdapter<CharacterModel, CharacterViewHolder>(DIFF) {
+class CharacterAdapter: PagingDataAdapter<CharacterModel, CharacterViewHolder>(DIFF) {
+
+    private var itemClickListener: ItemClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_character, parent, false)
@@ -21,7 +21,7 @@ class CharacterAdapter(
         holder.bind(item)
 
         holder.itemView.setOnClickListener {
-            itemClickListener.onItemClick(item)
+            itemClickListener?.onItemClick(item)
         }
     }
     companion object {
@@ -29,6 +29,10 @@ class CharacterAdapter(
             override fun areItemsTheSame(oldItem: CharacterModel, newItem: CharacterModel) = oldItem.id == newItem.id
             override fun areContentsTheSame(oldItem: CharacterModel, newItem: CharacterModel) = oldItem == newItem
         }
+    }
+
+    fun setListener(itemClickListener: ItemClickListener){
+        this.itemClickListener = itemClickListener
     }
 
 

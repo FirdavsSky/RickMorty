@@ -41,7 +41,9 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
 
     private var characterNavigator: CharacterNavigator? = null
 
-    private lateinit var adapter: CharacterAdapter
+    private val adapter: CharacterAdapter by lazy {
+        CharacterAdapter()
+    }
     private lateinit var swipe: SwipeRefreshLayout
     private lateinit var recycler: RecyclerView
     private lateinit var progressBarMain: ProgressBar
@@ -71,9 +73,8 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
             swipe.isRefreshing = false
         }
 
-        adapter = CharacterAdapter { character ->
-
-            characterNavigator?.openCharacterDetails(character.id)
+        adapter.setListener {
+            characterNavigator?.openCharacterDetails(it.id)
         }
 
         recycler.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -151,16 +152,18 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
     }
 
     private fun showKeyboard() {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
     }
 
     private fun hideKeyboard() {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm =
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(editText.windowToken, 0)
     }
 
-    fun  initCharacterNavigator(characterNavigator: CharacterNavigator): CharactersFragment{
+    fun initCharacterNavigator(characterNavigator: CharacterNavigator): CharactersFragment {
         this.characterNavigator = characterNavigator
         return this@CharactersFragment
     }

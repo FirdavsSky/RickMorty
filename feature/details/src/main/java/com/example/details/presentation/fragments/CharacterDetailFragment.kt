@@ -3,21 +3,20 @@ package com.example.details.presentation.fragments
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.bumptech.glide.Glide
-import com.conts.CharacterColors
-import com.conts.CharacterStrings
 import com.example.details.R
 import com.example.details.presentation.intent.CharacterDetailIntent
 import com.example.details.presentation.uiState.CharacterDetailState
 import com.example.details.presentation.viewModels.CharacterDetailViewModel
 import com.example.domain.model.CharacterModel
+import com.example.extention.loadImageWithProgress
+import com.example.extention.setStatus
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -31,6 +30,7 @@ class CharacterDetailFragment : Fragment(R.layout.fragment_character_detail) {
     private lateinit var tvStatus: TextView
     private lateinit var tvSpecies: TextView
     private lateinit var tvGender: TextView
+    private lateinit var progressBar: ProgressBar
 
     private var characterId: Int = 0
 
@@ -41,14 +41,18 @@ class CharacterDetailFragment : Fragment(R.layout.fragment_character_detail) {
         tvStatus = view.findViewById(R.id.tvStatus)
         tvSpecies = view.findViewById(R.id.tvSpecies)
         tvGender = view.findViewById(R.id.tvGender)
+        progressBar = view.findViewById(R.id.progressBarItem)
 
         characterId = arguments?.getInt(ARG_ID) ?: 0
 
         viewLifecycleOwner.lifecycleScope.launch {
+
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
                 viewModel.state.collect { state ->
                     when (state) {
                         is CharacterDetailState.Idle -> Unit
+
                         is CharacterDetailState.Loading -> tvName.text = "Loading..."
 
                         is CharacterDetailState.Success -> {
@@ -72,17 +76,13 @@ class CharacterDetailFragment : Fragment(R.layout.fragment_character_detail) {
         tvSpecies.text = "Species: ${character.species}"
         tvGender.text = "Gender: ${character.gender}"
 
-        val color = when (character.status) {
-            CharacterStrings.STATUS_ALIVE -> ContextCompat.getColor(requireContext(), CharacterColors.STATUS_ALIVE)
-            CharacterStrings.STATUS_DEAD -> ContextCompat.getColor(requireContext(), CharacterColors.STATUS_DEAD)
-            else  -> ContextCompat.getColor(requireContext(), CharacterColors.STATUS_UNKNOWN)
-        }
-        tvStatus.setTextColor(color)
+        tvStatus.setStatus(character.status)
 
-        Glide.with(requireContext())
-            .load(character.image)
-            .placeholder(com.example.common_ui.R.drawable.rick_morty_placeholder)
-            .into(ivImage)
+        ivImage.loadImageWithProgress(
+            character.image,
+            progressBar,
+            com.example.common_ui.R.drawable.rick_morty_placeholder
+        )
     }
 
     companion object {
