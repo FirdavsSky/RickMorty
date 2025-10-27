@@ -9,6 +9,8 @@ import javax.inject.Inject
 class GetCharactersUseCase @Inject constructor(
     private val repository: CharactersRepository
 ) {
+    private val TAG = "RickMorty.UseCase"
+
     operator fun invoke(
         query: String? = null,
         status: String? = null,

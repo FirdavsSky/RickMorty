@@ -1,5 +1,6 @@
 package com.example.characters.presentation.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +24,7 @@ class CharacterAdapter(
 
     override fun onBindViewHolder(holder: CharacterViewHolder, position: Int) {
         val item = getItem(position) ?: return
+        Log.d("onBindViewHolder", "onBindViewHolder: $item")
         holder.bind(item)
         holder.itemView.setOnClickListener { onItemClick(item) }
     }

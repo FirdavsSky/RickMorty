@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.example.characters.presentation.intents.CharacterListIntent
 import com.example.characters.presentation.states.CharacterListState
-import com.example.domain.repository.CharactersRepository
+import com.example.domain.usecase.GetCharactersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CharacterListViewModel @Inject constructor(
-    private val repository: CharactersRepository
+    private val getCharactersUseCase: GetCharactersUseCase
 ): ViewModel() {
 
     private val _state = MutableStateFlow(CharacterListState())
@@ -64,7 +64,7 @@ class CharacterListViewModel @Inject constructor(
         _state.update { it.copy(isLoading = true, error = null) }
         currentPagingJob = viewModelScope.launch {
             val s = _state.value
-            repository.getCharactersPaged(s.searchQuery, s.statusFilter, s.speciesFilter, s.genderFilter)
+            getCharactersUseCase(s.searchQuery, s.statusFilter, s.speciesFilter, s.genderFilter)
                 .cachedIn(viewModelScope)
                 .collectLatest { pagingData ->
                     _state.update { it.copy(isLoading = false, pagingData = pagingData) }

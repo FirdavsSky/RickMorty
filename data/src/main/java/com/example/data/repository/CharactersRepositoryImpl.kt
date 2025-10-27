@@ -1,5 +1,6 @@
 package com.example.data.repository
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -21,6 +22,9 @@ class CharactersRepositoryImpl @Inject constructor(
     private val mapper: CharacterMapper
 ) : CharactersRepository {
 
+    private val TAG = "RickMorty.Repository"
+
+
     @OptIn(ExperimentalPagingApi::class)
     override fun getCharactersPaged(
         query: String?,
@@ -28,16 +32,39 @@ class CharactersRepositoryImpl @Inject constructor(
         species: String?,
         gender: String?
     ): Flow<PagingData<CharacterModel>> {
-        val pagingSourceFactory = { db.characterDao().pagingSource(query, status, species, gender) }
+        Log.d(TAG, "getCharactersPaged called with filters: query=$query, status=$status, species=$species, gender=$gender")
+
+        val pagingSourceFactory = {
+            Log.d(TAG, "Creating PagingSource with filters: query=$query, status=$status, species=$species, gender=$gender")
+            db.characterDao().pagingSource(query, status, species, gender)
+        }
+
         return Pager(
             config = PagingConfig(pageSize = 20),
             remoteMediator = CharactersRemoteMediator(api, db, query, status, species, gender),
             pagingSourceFactory = pagingSourceFactory
-        ).flow.map { pd -> pd.map { mapper.entityToDomain(it) } }
+        ).flow.map { pagingData ->
+            pagingData.map { entity ->
+                try {
+                    val domain = mapper.entityToDomain(entity)
+                    Log.d(TAG, "Mapped Character: $domain")
+                    domain
+                } catch (e: Exception) {
+                    Log.e(TAG, "Mapping failed for entity=${entity.id}", e)
+                    mapper.entityToDomain(entity)
+                }
+            }
+        }
     }
 
     override suspend fun getCharacterById(id: Int): CharacterModel? {
-        return db.characterDao().getCharacter(id)?.let { mapper.entityToDomain(it) }
+        Log.d(TAG, "getCharacterById called with id=$id")
+        return db.characterDao().getCharacter(id)?.let {
+            val domain = mapper.entityToDomain(it)
+            Log.d(TAG, "Character found: $domain")
+            domain
+        }
     }
 }
+
 
