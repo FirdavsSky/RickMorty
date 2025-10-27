@@ -1,12 +1,10 @@
 package com.example.characters.presentation.fragments
 
 import android.app.AlertDialog
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -55,6 +53,32 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
     private lateinit var informationView: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+        initView()
+        initListener()
+        initAdapter()
+        initSearchEditText()
+        initObservers()
+
+    }
+
+    private fun initSearchEditText(){
+
+        editText.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val query = v.text.toString()
+                Log.d("CharactersFragment", "Search triggered with query: $query") // <<< лог
+                vm.submitIntent(CharacterListIntent.Search(query))
+                true
+            } else {
+                false
+            }
+        }
+
+    }
+
+    private fun initView(){
+
         swipe = findViewById(R.id.swipe)
         recycler = findViewById(R.id.recycler)
         progressBarMain = findViewById(R.id.progressBarMain)
@@ -64,6 +88,18 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         hideSearchButton = findViewById(R.id.hideSearchButton)
         toolbar = findViewById(R.id.toolbar)
         informationView = findViewById(R.id.informationView)
+    }
+
+    private fun initAdapter(){
+
+        recycler.layoutManager = GridLayoutManager(requireContext(), 2)
+        recycler.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = LoadingStateAdapter { adapter.retry() },
+            footer = LoadingStateAdapter { adapter.retry() }
+        )
+    }
+
+    private fun initListener(){
 
         imageSearch.setOnClickListener(this)
         hideSearchButton.setOnClickListener(this)
@@ -76,12 +112,9 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         adapter.setListener {
             characterNavigator?.openCharacterDetails(it.id)
         }
+    }
 
-        recycler.layoutManager = GridLayoutManager(requireContext(), 2)
-        recycler.adapter = adapter.withLoadStateHeaderAndFooter(
-            header = LoadingStateAdapter { adapter.retry() },
-            footer = LoadingStateAdapter { adapter.retry() }
-        )
+    private fun initObservers(){
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -100,30 +133,11 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
                     informationView.isVisible = !state.isLoading && isEmpty
                     recycler.isVisible = !isEmpty
 
-                    if (!state.error.isNullOrEmpty()) {
-                        AlertDialog.Builder(requireContext())
-                            .setTitle("Ошибка")
-                            .setMessage(state.error)
-                            .setPositiveButton("Ок") { dialog, _ ->
-                                dialog.dismiss()
-                            }
-                            .show()
-                    }
+                    showErrorDialog(state.error)
+
                 }
             }
         }
-
-        editText.setOnEditorActionListener { v, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                val query = v.text.toString()
-                Log.d("CharactersFragment", "Search triggered with query: $query") // <<< лог
-                vm.submitIntent(CharacterListIntent.Search(query))
-                true
-            } else {
-                false
-            }
-        }
-
     }
 
     override fun onClick(v: View?) {
@@ -137,7 +151,6 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
                 editText.requestFocus()
                 toolbar.visibility = View.INVISIBLE
 
-//                showKeyboard()
             }
 
             R.id.hideSearchButton -> {
@@ -146,21 +159,18 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
                 imageSearch.visibility = View.VISIBLE
                 toolbar.visibility = View.VISIBLE
 
-//                hideKeyboard()
             }
         }
     }
 
-    private fun showKeyboard() {
-        val imm =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
-    }
-
-    private fun hideKeyboard() {
-        val imm =
-            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(editText.windowToken, 0)
+    private fun showErrorDialog(message: String?) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Error")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     fun initCharacterNavigator(characterNavigator: CharacterNavigator): CharactersFragment {

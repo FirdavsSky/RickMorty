@@ -15,6 +15,7 @@ import com.example.details.presentation.intent.CharacterDetailIntent
 import com.example.details.presentation.uiState.CharacterDetailState
 import com.example.details.presentation.viewModels.CharacterDetailViewModel
 import com.example.domain.model.CharacterModel
+import com.example.extention.findViewById
 import com.example.extention.loadImageWithProgress
 import com.example.extention.setStatus
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,14 +37,25 @@ class CharacterDetailFragment : Fragment(R.layout.fragment_character_detail) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ivImage = view.findViewById(R.id.ivCharacterImage)
-        tvName = view.findViewById(R.id.tvName)
-        tvStatus = view.findViewById(R.id.tvStatus)
-        tvSpecies = view.findViewById(R.id.tvSpecies)
-        tvGender = view.findViewById(R.id.tvGender)
-        progressBar = view.findViewById(R.id.progressBarItem)
 
         characterId = arguments?.getInt(ARG_ID) ?: 0
+        viewModel.handleIntent(CharacterDetailIntent.LoadCharacter(characterId))
+
+        initView()
+        initObservers()
+    }
+
+    private fun initView() {
+
+        ivImage = findViewById(R.id.ivCharacterImage)
+        tvName = findViewById(R.id.tvName)
+        tvStatus = findViewById(R.id.tvStatus)
+        tvSpecies = findViewById(R.id.tvSpecies)
+        tvGender = findViewById(R.id.tvGender)
+        progressBar = findViewById(R.id.progressBarItem)
+    }
+
+    private fun initObservers() {
 
         viewLifecycleOwner.lifecycleScope.launch {
 
@@ -67,7 +79,6 @@ class CharacterDetailFragment : Fragment(R.layout.fragment_character_detail) {
                 }
             }
         }
-        viewModel.handleIntent(CharacterDetailIntent.LoadCharacter(characterId))
     }
 
     private fun bindCharacter(character: CharacterModel) {

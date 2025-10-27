@@ -39,6 +39,6 @@ dependencies {
     implementation("javax.inject:javax.inject:1")
 
     // Paging 3
-    implementation("androidx.paging:paging-runtime:3.3.6")
-    implementation("androidx.paging:paging-common:3.3.6")
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.common)
 }
