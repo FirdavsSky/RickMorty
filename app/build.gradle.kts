@@ -40,9 +40,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":domain"))
-    implementation(project(":data"))
+
     implementation(project(":feature:characters"))
     implementation(project(":feature:details"))
     implementation(project(":common-ui"))
@@ -50,6 +48,5 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.appcompat)
     kapt(libs.hilt.compiler)
-
     implementation(libs.androidx.fragment.ktx)
 }

@@ -29,6 +29,9 @@ import com.example.characters.presentation.adapters.CharacterAdapter
 import com.example.characters.presentation.intents.CharacterListIntent
 import com.example.characters.presentation.viewModels.CharacterListViewModel
 import com.example.extention.findViewById
+import com.example.extention.gone
+import com.example.extention.invisible
+import com.example.extention.visible
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
@@ -131,13 +134,13 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
 
         fabFilter.setOnClickListener {
             if (linearLayoutFilters.isVisible) {
-                linearLayoutFilters.visibility = View.GONE
-                searchLayout.visibility = View.VISIBLE
+                linearLayoutFilters.gone()
+                searchLayout.visible()
                 viewModel.submitIntent(CharacterListIntent.ApplyFilter(status = null, species = null, gender = null))
 
             } else {
-                linearLayoutFilters.visibility = View.VISIBLE
-                searchLayout.visibility = View.GONE
+                linearLayoutFilters.visible()
+                searchLayout.gone()
             }
         }
 
@@ -189,36 +192,37 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 launch {
-                    viewModel.state.collectLatest { state ->
-                        state.pagingData.let { pagingData ->
-                            adapter.submitData(viewLifecycleOwner.lifecycle, pagingData)
-                        }
-
-                        state.error?.let {
-                            showErrorDialog(it)
-                        }
-                    }
+                    observeState()
                 }
 
                 launch {
-                    adapter.loadStateFlow.collectLatest { loadStates ->
-                        val isRefreshing = loadStates.refresh is LoadState.Loading
-                        val isError = loadStates.refresh is LoadState.Error
-                        val isEmpty = loadStates.refresh is LoadState.NotLoading &&
-                                adapter.itemCount == 0
-
-                        progressBarMain.isVisible = isRefreshing
-                        recycler.isVisible = !isRefreshing && !isEmpty
-                        informationView.isVisible = isEmpty
-
-                        if (isError) {
-                            val error = (loadStates.refresh as LoadState.Error).error
-                            showErrorDialog(error.message ?: "Ошибка загрузки данных")
-                        }
-
-                        progressBarFooter.isVisible = loadStates.append is LoadState.Loading
-                    }
+                    observeAdapterLoadState()
                 }
+            }
+        }
+    }
+
+    private suspend fun observeState() {
+        viewModel.state.collectLatest { state ->
+            adapter.submitData(viewLifecycleOwner.lifecycle, state.pagingData)
+            state.error?.let { showErrorDialog(it) }
+        }
+    }
+
+    private suspend fun observeAdapterLoadState() {
+        adapter.loadStateFlow.collectLatest { loadStates ->
+            val isRefreshing = loadStates.refresh is LoadState.Loading
+            val isError = loadStates.refresh is LoadState.Error
+            val isEmpty = loadStates.refresh is LoadState.NotLoading && adapter.itemCount == 0
+
+            progressBarMain.isVisible = isRefreshing
+            recycler.isVisible = !isRefreshing && !isEmpty
+            informationView.isVisible = isEmpty
+            progressBarFooter.isVisible = loadStates.append is LoadState.Loading
+
+            if (isError) {
+                val error = (loadStates.refresh as LoadState.Error).error
+                showErrorDialog(error.message ?: "Ошибка загрузки данных")
             }
         }
     }
@@ -230,18 +234,18 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
 
             R.id.imageViewSearch -> {
 
-                imageSearch.visibility = View.GONE
-                linearSearch.visibility = View.VISIBLE
+                imageSearch.gone()
+                linearSearch.visible()
                 editText.requestFocus()
-                toolbar.visibility = View.INVISIBLE
+                toolbar.invisible()
 
             }
 
             R.id.hideSearchButton -> {
 
-                linearSearch.visibility = View.INVISIBLE
-                imageSearch.visibility = View.VISIBLE
-                toolbar.visibility = View.VISIBLE
+                linearSearch.invisible()
+                imageSearch.visible()
+                toolbar.visible()
                 editText.text.clear()
                 viewModel.submitIntent(CharacterListIntent.Search(""))
             }

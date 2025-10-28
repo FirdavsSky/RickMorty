@@ -40,12 +40,11 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
     implementation(project(":common-ui"))
+
     implementation(libs.androidx.core.ktx)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.0")
-
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.3")
-
     implementation(libs.hilt.android)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.paging.runtime.ktx)
     kapt(libs.hilt.compiler)
 
@@ -58,6 +57,6 @@ dependencies {
 
     implementation(libs.glide)
 
-    implementation("androidx.hilt:hilt-navigation-fragment:1.1.0")
+    implementation(libs.androidx.hilt.navigation.fragment)
 
 }

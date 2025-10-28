@@ -12,14 +12,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginTop="50dp"
         android:gravity="center_horizontal">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="#c2c2c2"
+            app:title="Детали о персонаже"
+            app:titleCentered="true"
+            app:navigationIcon="@drawable/ic_arrow_left_ios"
+            app:navigationContentDescription="Назад" />
+
 
         <!-- Фото персонажа в CardView -->
         <androidx.cardview.widget.CardView
             android:layout_width="200dp"
             android:layout_height="200dp"
+            android:layout_marginTop="36dp"
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="8dp">

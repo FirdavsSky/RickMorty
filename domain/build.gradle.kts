@@ -36,7 +36,7 @@ android {
 
 dependencies {
     implementation(project(":core"))
-    implementation("javax.inject:javax.inject:1")
+    implementation(libs.javax.inject)
 
     // Paging 3
     implementation(libs.androidx.paging.runtime)

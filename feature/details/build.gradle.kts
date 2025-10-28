@@ -37,6 +37,10 @@ android {
 }
 
 dependencies {
+
+    implementation(project(":common-ui"))
+    implementation(project(":domain"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -44,14 +48,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.fragment.ktx)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-
     implementation(libs.hilt.android)
     implementation(libs.androidx.paging.runtime.ktx)
     kapt(libs.hilt.compiler)
-    implementation(project(":common-ui"))
-    implementation(project(":domain"))
     implementation(libs.glide)
 }
