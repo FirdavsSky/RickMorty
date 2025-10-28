@@ -12,7 +12,6 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 object CharacterListModule {
 
-    // UseCases
     @Provides
     fun provideGetCharactersUseCase(repository: CharactersRepository): GetCharactersUseCase {
         return GetCharactersUseCase(repository)

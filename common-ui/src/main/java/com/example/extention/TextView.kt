@@ -3,8 +3,8 @@ package com.example.extention
 import android.graphics.drawable.GradientDrawable
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.conts.CharacterColors
-import com.conts.CharacterStrings
+import com.example.conts.CharacterColors
+import com.example.conts.CharacterStrings
 
 fun TextView.setStatus(status: String) {
     val color = when (status) {

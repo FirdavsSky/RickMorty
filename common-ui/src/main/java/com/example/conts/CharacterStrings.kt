@@ -1,4 +1,4 @@
-package com.conts
+package com.example.conts
 
 
 object CharacterStrings {

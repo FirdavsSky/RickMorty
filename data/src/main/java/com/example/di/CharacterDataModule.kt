@@ -38,7 +38,7 @@ object CharacterDataModule {
             .build()
     }
 
-    // Retrofit
+    // ToDo Use NdK for baseUrl security
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {

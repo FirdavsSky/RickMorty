@@ -1,4 +1,4 @@
-package com.conts
+package com.example.conts
 
 import com.example.common_ui.R
 

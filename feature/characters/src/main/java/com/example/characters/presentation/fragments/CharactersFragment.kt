@@ -2,7 +2,6 @@ package com.example.characters.presentation.fragments
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
@@ -40,13 +39,10 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickListener {
 
-    private val vm: CharacterListViewModel by viewModels()
+    private val viewModel: CharacterListViewModel by viewModels()
 
     private var characterNavigator: CharacterNavigator? = null
 
-    private val adapter: CharacterAdapter by lazy {
-        CharacterAdapter()
-    }
     private lateinit var swipe: SwipeRefreshLayout
     private lateinit var recycler: RecyclerView
     private lateinit var progressBarMain: ProgressBar
@@ -64,6 +60,7 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
     private lateinit var genderFilterSpinner: Spinner
     private lateinit var searchLayout: RelativeLayout
 
+    private val adapter: CharacterAdapter by lazy {CharacterAdapter()}
     private val statusApiArray by lazy { resources.getStringArray(R.array.status_options_api) }
     private val speciesApiArray by lazy { resources.getStringArray(R.array.species_options_api) }
     private val genderApiArray by lazy { resources.getStringArray(R.array.gender_options_api) }
@@ -84,7 +81,7 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         editText.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val query = v.text.toString()
-                vm.submitIntent(CharacterListIntent.Search(query))
+                viewModel.submitIntent(CharacterListIntent.Search(query))
                 true
             } else {
                 false
@@ -124,7 +121,7 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         hideSearchButton.setOnClickListener(this)
 
         swipe.setOnRefreshListener {
-            vm.submitIntent(CharacterListIntent.Refresh)
+            viewModel.submitIntent(CharacterListIntent.Refresh)
             swipe.isRefreshing = false
         }
 
@@ -136,7 +133,7 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
             if (linearLayoutFilters.isVisible) {
                 linearLayoutFilters.visibility = View.GONE
                 searchLayout.visibility = View.VISIBLE
-                vm.submitIntent(CharacterListIntent.ApplyFilter(status = null, species = null, gender = null))
+                viewModel.submitIntent(CharacterListIntent.ApplyFilter(status = null, species = null, gender = null))
 
             } else {
                 linearLayoutFilters.visibility = View.VISIBLE
@@ -171,7 +168,7 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
                 val species = speciesApiArray[speciesFilterSpinner.selectedItemPosition]
                 val gender = genderApiArray[genderFilterSpinner.selectedItemPosition]
 
-                vm.submitIntent(CharacterListIntent.ApplyFilter(
+                viewModel.submitIntent(CharacterListIntent.ApplyFilter(
                     status = if (status == "all") null else status,
                     species = if (species == "all") null else species,
                     gender = if (gender == "all") null else gender
@@ -192,9 +189,8 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 launch {
-                    vm.state.collectLatest { state ->
+                    viewModel.state.collectLatest { state ->
                         state.pagingData.let { pagingData ->
-                            Log.d("CharactersFragment", "Submitting new paging data")
                             adapter.submitData(viewLifecycleOwner.lifecycle, pagingData)
                         }
 
@@ -207,23 +203,19 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
                 launch {
                     adapter.loadStateFlow.collectLatest { loadStates ->
                         val isRefreshing = loadStates.refresh is LoadState.Loading
-                        val isAppending = loadStates.append is LoadState.Loading
                         val isError = loadStates.refresh is LoadState.Error
                         val isEmpty = loadStates.refresh is LoadState.NotLoading &&
                                 adapter.itemCount == 0
 
-                        // 👇 Обновляем видимость элементов
                         progressBarMain.isVisible = isRefreshing
                         recycler.isVisible = !isRefreshing && !isEmpty
                         informationView.isVisible = isEmpty
 
-                        // 👇 Ошибки при загрузке
                         if (isError) {
                             val error = (loadStates.refresh as LoadState.Error).error
                             showErrorDialog(error.message ?: "Ошибка загрузки данных")
                         }
 
-                        // 👇 Если идёт догрузка (нижний loader)
                         progressBarFooter.isVisible = loadStates.append is LoadState.Loading
                     }
                 }
@@ -235,9 +227,9 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
     override fun onClick(v: View?) {
 
         when (v?.id) {
+
             R.id.imageViewSearch -> {
 
-                // Показать строку поиска
                 imageSearch.visibility = View.GONE
                 linearSearch.visibility = View.VISIBLE
                 editText.requestFocus()
@@ -246,17 +238,18 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
             }
 
             R.id.hideSearchButton -> {
-                // Скрыть строку поиска
+
                 linearSearch.visibility = View.INVISIBLE
                 imageSearch.visibility = View.VISIBLE
                 toolbar.visibility = View.VISIBLE
                 editText.text.clear()
-                vm.submitIntent(CharacterListIntent.Search(""))
+                viewModel.submitIntent(CharacterListIntent.Search(""))
             }
         }
     }
 
     private fun showErrorDialog(message: String?) {
+
         AlertDialog.Builder(requireContext())
             .setTitle("Error")
             .setMessage(message)
