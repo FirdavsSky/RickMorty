@@ -17,12 +17,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.characters.R
 import com.example.characters.presentation.adapters.CharacterAdapter
-import com.example.characters.presentation.adapters.LoadingStateAdapter
 import com.example.characters.presentation.intents.CharacterListIntent
 import com.example.characters.presentation.viewModels.CharacterListViewModel
 import com.example.extention.findViewById
@@ -45,6 +45,7 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
     private lateinit var swipe: SwipeRefreshLayout
     private lateinit var recycler: RecyclerView
     private lateinit var progressBarMain: ProgressBar
+    private lateinit var progressBarFooter: ProgressBar
     private lateinit var imageSearch: ImageView
     private lateinit var linearSearch: LinearLayout
     private lateinit var editText: EditText
@@ -82,6 +83,7 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         swipe = findViewById(R.id.swipe)
         recycler = findViewById(R.id.recycler)
         progressBarMain = findViewById(R.id.progressBarMain)
+        progressBarFooter = findViewById(R.id.progressBarFooter)
         imageSearch = findViewById(R.id.imageViewSearch)
         linearSearch = findViewById(R.id.linearLayoutSearch)
         editText = findViewById(R.id.editText)
@@ -93,10 +95,7 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
     private fun initAdapter(){
 
         recycler.layoutManager = GridLayoutManager(requireContext(), 2)
-        recycler.adapter = adapter.withLoadStateHeaderAndFooter(
-            header = LoadingStateAdapter { adapter.retry() },
-            footer = LoadingStateAdapter { adapter.retry() }
-        )
+        recycler.adapter = adapter
     }
 
     private fun initListener(){
@@ -114,31 +113,51 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         }
     }
 
-    private fun initObservers(){
+    private fun initObservers() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                vm.state.collectLatest { state ->
+                launch {
+                    vm.state.collectLatest { state ->
+                        state.pagingData.let { pagingData ->
+                            Log.d("CharactersFragment", "Submitting new paging data")
+                            adapter.submitData(viewLifecycleOwner.lifecycle, pagingData)
+                        }
 
-                    progressBarMain.isVisible = state.isLoading
-                    recycler.isVisible = !state.isLoading
-
-                    state.pagingData.let { pagingData ->
-                        Log.d("CharactersFragment", "Submitting new paging data")
-                        adapter.submitData(pagingData)
+                        state.error?.let {
+                            showErrorDialog(it)
+                        }
                     }
+                }
 
-                    val isEmpty = adapter.itemCount == 0
-                    informationView.isVisible = !state.isLoading && isEmpty
-                    recycler.isVisible = !isEmpty
+                launch {
+                    adapter.loadStateFlow.collectLatest { loadStates ->
+                        val isRefreshing = loadStates.refresh is LoadState.Loading
+                        val isAppending = loadStates.append is LoadState.Loading
+                        val isError = loadStates.refresh is LoadState.Error
+                        val isEmpty = loadStates.refresh is LoadState.NotLoading &&
+                                adapter.itemCount == 0
 
-                    showErrorDialog(state.error)
+                        // 👇 Обновляем видимость элементов
+                        progressBarMain.isVisible = isRefreshing
+                        recycler.isVisible = !isRefreshing && !isEmpty
+                        informationView.isVisible = isEmpty
 
+                        // 👇 Ошибки при загрузке
+                        if (isError) {
+                            val error = (loadStates.refresh as LoadState.Error).error
+                            showErrorDialog(error.message ?: "Ошибка загрузки данных")
+                        }
+
+                        // 👇 Если идёт догрузка (нижний loader)
+                        progressBarFooter.isVisible = loadStates.append is LoadState.Loading
+                    }
                 }
             }
         }
     }
+
 
     override fun onClick(v: View?) {
 

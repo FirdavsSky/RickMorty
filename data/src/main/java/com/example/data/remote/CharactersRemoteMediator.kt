@@ -29,25 +29,50 @@ class CharactersRemoteMediator @Inject constructor(
         loadType: LoadType,
         state: PagingState<Int, CharacterEntity>
     ): MediatorResult {
+        Log.d(TAG, "=== load called ===")
+        Log.d(TAG, "loadType = $loadType")
+        Log.d(TAG, "state.pages.size = ${state.pages.size}")
+        Log.d(TAG, "state.anchorPosition = ${state.anchorPosition}")
+        Log.d(TAG, "state.lastItemOrNull() = ${state.lastItemOrNull()}")
+
         try {
             val page = when (loadType) {
-                LoadType.REFRESH -> 1
-                LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
+                LoadType.REFRESH -> {
+                    Log.d(TAG, "Determined page = 1 for REFRESH")
+                    1
+                }
+                LoadType.PREPEND -> {
+                    Log.d(TAG, "PREPEND → endOfPaginationReached = true")
+                    return MediatorResult.Success(endOfPaginationReached = true)
+                }
                 LoadType.APPEND -> {
-                    val remoteKeysDao = db.remoteKeysDao()
-                    val lastItem = state.lastItemOrNull()
-                    val keys = lastItem?.let { remoteKeysDao.remoteKeysCharacterId(it.id) }
-                    keys?.nextKey ?: return MediatorResult.Success(endOfPaginationReached = true)
+                    // Сначала пробуем взять последний элемент из state
+                    var lastItem = state.lastItemOrNull()
+
+                    // Если state.lastItemOrNull() null (первый запуск), достаем последний элемент из БД
+                    if (lastItem == null) {
+                        lastItem = db.characterDao().getLastCharacter()
+                        Log.d(TAG, "lastItem after fallback = $lastItem")
+                    }
+
+                    if (lastItem == null) {
+                        Log.d(TAG, "RemoteKeys for lastItem: null → endOfPaginationReached = true")
+                        return MediatorResult.Success(endOfPaginationReached = true)
+                    }
+
+                    val keys = db.remoteKeysDao().remoteKeysCharacterId(lastItem.id)
+                    val nextKey = keys?.nextKey
+                    Log.d(TAG, "RemoteKeys for lastItem: $keys, nextKey = $nextKey")
+
+                    nextKey ?: return MediatorResult.Success(endOfPaginationReached = true)
                 }
             }
 
-            Log.d(TAG, "Loading page: $page, type: $loadType")
+            Log.d(TAG, "Loading page: $page")
 
             val response = api.getCharacters(page, query, status, species, gender)
-
-
             val characters = response.results.map { dto ->
-                Log.d(TAG, "characters $dto")
+                Log.d(TAG, "Fetched character: $dto")
                 CharacterEntity(
                     id = dto.id,
                     name = dto.name,
@@ -60,10 +85,11 @@ class CharactersRemoteMediator @Inject constructor(
             }
 
             val endOfPaginationReached = response.info.next == null
+            Log.d(TAG, "endOfPaginationReached = $endOfPaginationReached")
 
             db.withTransaction {
                 if (loadType == LoadType.REFRESH) {
-                    Log.d(TAG, "Clearing all characters and remote keys from DB")
+                    Log.d(TAG, "Clearing DB before REFRESH")
                     db.characterDao().clearAll()
                     db.remoteKeysDao().clearRemoteKeys()
                 }
@@ -78,10 +104,10 @@ class CharactersRemoteMediator @Inject constructor(
                     )
                 }
                 db.remoteKeysDao().insertAll(keys)
-
-                Log.d(TAG, "Inserted ${characters.size} characters and ${keys.size} remote keys into DB")
+                Log.d(TAG, "Inserted ${characters.size} characters and ${keys.size} remote keys")
             }
 
+            Log.d(TAG, "=== load finished successfully ===")
             return MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
         } catch (e: Exception) {
             Log.e(TAG, "Error loading characters: ${e.message}", e)

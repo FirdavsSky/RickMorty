@@ -40,7 +40,11 @@ class CharactersRepositoryImpl @Inject constructor(
         }
 
         return Pager(
-            config = PagingConfig(pageSize = 20),
+            config = PagingConfig(
+                pageSize = 20,
+                initialLoadSize = 20,   // теперь загружается ровно одна страница при refresh
+                prefetchDistance = 5    // можно уменьшить, чтобы не подгружать заранее
+            ),
             remoteMediator = CharactersRemoteMediator(api, db, query, status, species, gender),
             pagingSourceFactory = pagingSourceFactory
         ).flow.map { pagingData ->

@@ -32,4 +32,8 @@ interface CharacterDao {
 
     @Query("SELECT * FROM characters WHERE id = :id")
     suspend fun getCharacter(id: Int): CharacterEntity?
+
+    // <- Добавляем этот метод:
+    @Query("SELECT * FROM characters ORDER BY id DESC LIMIT 1")
+    suspend fun getLastCharacter(): CharacterEntity?
 }
