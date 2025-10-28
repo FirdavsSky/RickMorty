@@ -5,11 +5,15 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -27,6 +31,7 @@ import com.example.characters.presentation.intents.CharacterListIntent
 import com.example.characters.presentation.viewModels.CharacterListViewModel
 import com.example.extention.findViewById
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -52,6 +57,17 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
     private lateinit var hideSearchButton: ImageButton
     private lateinit var toolbar: MaterialToolbar
     private lateinit var informationView: TextView
+    private lateinit var fabFilter: FloatingActionButton
+    private lateinit var linearLayoutFilters: LinearLayout
+    private lateinit var statusFilterSpinner: Spinner
+    private lateinit var speciesFilterSpinner: Spinner
+    private lateinit var genderFilterSpinner: Spinner
+    private lateinit var searchLayout: RelativeLayout
+
+    private val statusApiArray by lazy { resources.getStringArray(R.array.status_options_api) }
+    private val speciesApiArray by lazy { resources.getStringArray(R.array.species_options_api) }
+    private val genderApiArray by lazy { resources.getStringArray(R.array.gender_options_api) }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
@@ -68,14 +84,12 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         editText.setOnEditorActionListener { v, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val query = v.text.toString()
-                Log.d("CharactersFragment", "Search triggered with query: $query") // <<< лог
                 vm.submitIntent(CharacterListIntent.Search(query))
                 true
             } else {
                 false
             }
         }
-
     }
 
     private fun initView(){
@@ -90,6 +104,12 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         hideSearchButton = findViewById(R.id.hideSearchButton)
         toolbar = findViewById(R.id.toolbar)
         informationView = findViewById(R.id.informationView)
+        fabFilter = findViewById(R.id.fabFilter)
+        linearLayoutFilters = findViewById(R.id.filtersLayout)
+        statusFilterSpinner = findViewById(R.id.spinnerStatus)
+        speciesFilterSpinner = findViewById(R.id.spinnerSpecies)
+        genderFilterSpinner = findViewById(R.id.spinnerGender)
+        searchLayout = findViewById(R.id.searchLayout)
     }
 
     private fun initAdapter(){
@@ -111,6 +131,59 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         adapter.setListener {
             characterNavigator?.openCharacterDetails(it.id)
         }
+
+        fabFilter.setOnClickListener {
+            if (linearLayoutFilters.isVisible) {
+                linearLayoutFilters.visibility = View.GONE
+                searchLayout.visibility = View.VISIBLE
+                vm.submitIntent(CharacterListIntent.ApplyFilter(status = null, species = null, gender = null))
+
+            } else {
+                linearLayoutFilters.visibility = View.VISIBLE
+                searchLayout.visibility = View.GONE
+            }
+        }
+
+        statusFilterSpinner.adapter = ArrayAdapter(
+            requireContext(), android.R.layout.simple_spinner_item,
+            resources.getStringArray(R.array.status_options_display)
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        speciesFilterSpinner.adapter = ArrayAdapter(
+            requireContext(), android.R.layout.simple_spinner_item,
+            resources.getStringArray(R.array.species_options_display)
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        genderFilterSpinner.adapter = ArrayAdapter(
+            requireContext(), android.R.layout.simple_spinner_item,
+            resources.getStringArray(R.array.gender_options_display)
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        val listener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val status = statusApiArray[statusFilterSpinner.selectedItemPosition]
+                val species = speciesApiArray[speciesFilterSpinner.selectedItemPosition]
+                val gender = genderApiArray[genderFilterSpinner.selectedItemPosition]
+
+                vm.submitIntent(CharacterListIntent.ApplyFilter(
+                    status = if (status == "all") null else status,
+                    species = if (species == "all") null else species,
+                    gender = if (gender == "all") null else gender
+                ))
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+
+        statusFilterSpinner.onItemSelectedListener = listener
+        speciesFilterSpinner.onItemSelectedListener = listener
+        genderFilterSpinner.onItemSelectedListener = listener
     }
 
     private fun initObservers() {
@@ -177,7 +250,8 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
                 linearSearch.visibility = View.INVISIBLE
                 imageSearch.visibility = View.VISIBLE
                 toolbar.visibility = View.VISIBLE
-
+                editText.text.clear()
+                vm.submitIntent(CharacterListIntent.Search(""))
             }
         }
     }
