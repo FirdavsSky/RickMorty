@@ -221,11 +221,21 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
             progressBarFooter.isVisible = loadStates.append is LoadState.Loading
 
             if (isError) {
+
                 val error = (loadStates.refresh as LoadState.Error).error
-                showErrorDialog(error.message ?: "Ошибка загрузки данных")
+
+                if (error.message?.contains("404") == true) {
+                    informationView.visible()
+                    recycler.gone()
+                    progressBarMain.gone()
+                }
+                else{
+                    showErrorDialog(error.message)
+                }
             }
         }
     }
+
 
 
     override fun onClick(v: View?) {
