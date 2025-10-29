@@ -129,6 +129,7 @@ class CharactersFragment : Fragment(R.layout.fragment_characters), View.OnClickL
         }
 
         adapter.setListener {
+
             characterNavigator?.openCharacterDetails(it.id)
         }
 

@@ -59,4 +59,8 @@ dependencies {
 
     implementation(libs.androidx.hilt.navigation.fragment)
 
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+
 }
