@@ -5,16 +5,16 @@ import androidx.room.Room
 import com.example.data.local.dao.CharacterDao
 import com.example.data.local.db.AppDatabase
 import com.example.data.mapper.CharacterMapper
+import com.example.data.remote.APILoggingInterceptor
 import com.example.data.remote.api.RickAndMortyApi
 import com.example.data.repository.CharactersRepositoryImpl
 import com.example.domain.repository.CharactersRepository
-import com.example.domain.usecase.GetCharacterByIdUseCase
-import com.example.domain.usecase.GetCharactersUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -23,12 +23,28 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object CharacterDataModule {
 
-    // Retrofit
     @Provides
     @Singleton
-    fun provideRetrofit(): Retrofit {
+    fun provideLoggingInterceptor(): APILoggingInterceptor {
+        return APILoggingInterceptor()
+    }
+
+    // OkHttpClient с Interceptor
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(loggingInterceptor: APILoggingInterceptor): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+    }
+
+    // ToDo Use NdK for baseUrl security
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://rickandmortyapi.com/api/")
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -71,14 +87,5 @@ object CharacterDataModule {
         return CharactersRepositoryImpl(api, db, mapper)
     }
 
-    // UseCases
-    @Provides
-    fun provideGetCharactersUseCase(repository: CharactersRepository): GetCharactersUseCase {
-        return GetCharactersUseCase(repository)
-    }
 
-    @Provides
-    fun provideGetCharacterByIdUseCase(repository: CharactersRepository): GetCharacterByIdUseCase {
-        return GetCharacterByIdUseCase(repository)
-    }
 }

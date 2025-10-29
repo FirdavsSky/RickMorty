@@ -36,9 +36,13 @@ android {
 
 dependencies {
     implementation(project(":core"))
-    implementation("javax.inject:javax.inject:1")
+    implementation(libs.javax.inject)
 
     // Paging 3
-    implementation("androidx.paging:paging-runtime:3.3.6")
-    implementation("androidx.paging:paging-common:3.3.6")
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.common)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="character_image">Character Image</string>
-    <string name="alive">Alive</string>
-    <string name="human_male">Human | Male</string>
-    <string name="rick_sanchez">Rick Sanchez</string>
+    <string name="status">Статус</string>
+    <string name="species">Вид</string>
+    <string name="gender">Пол</string>
+    <string name="filter_text_description">Фильтры</string>
+    <string name="no_character_text">Персонажи не найдены</string>
 </resources>

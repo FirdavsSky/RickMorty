@@ -1,10 +1,13 @@
 package com.example.data.mapper
 
+import android.util.Log
 import com.example.data.local.model.CharacterEntity
 import com.example.data.remote.dto.CharacterResponse
+import com.example.domain.model.CharacterModel
+import javax.inject.Inject
 
 
-class CharacterMapper {
+class CharacterMapper @Inject constructor() {
     fun responseToEntity(response: CharacterResponse): CharacterEntity {
         return CharacterEntity(
             id = response.id,
@@ -17,7 +20,8 @@ class CharacterMapper {
         )
     }
 
-    fun entityToDomain(entity: CharacterEntity): com.example.domain.model.CharacterModel {
+    fun entityToDomain(entity: CharacterEntity): CharacterModel {
+        Log.d("entityToDomain", "entityToDomain: $entity")
         return com.example.domain.model.CharacterModel(
             id = entity.id,
             name = entity.name,

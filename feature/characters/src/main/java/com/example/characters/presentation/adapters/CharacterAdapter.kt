@@ -1,20 +1,15 @@
 package com.example.characters.presentation.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.characters.R
 import com.example.domain.model.CharacterModel
 
-class CharacterAdapter(
-    private val onItemClick: (CharacterModel) -> Unit
-) : PagingDataAdapter<CharacterModel, CharacterViewHolder>(DIFF) {
+class CharacterAdapter: PagingDataAdapter<CharacterModel, CharacterViewHolder>(DIFF) {
+
+    private var itemClickListener: ItemClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_character, parent, false)
@@ -24,7 +19,10 @@ class CharacterAdapter(
     override fun onBindViewHolder(holder: CharacterViewHolder, position: Int) {
         val item = getItem(position) ?: return
         holder.bind(item)
-        holder.itemView.setOnClickListener { onItemClick(item) }
+
+        holder.itemView.setOnClickListener {
+            itemClickListener?.onItemClick(item)
+        }
     }
     companion object {
         val DIFF = object : DiffUtil.ItemCallback<CharacterModel>() {
@@ -32,22 +30,11 @@ class CharacterAdapter(
             override fun areContentsTheSame(oldItem: CharacterModel, newItem: CharacterModel) = oldItem == newItem
         }
     }
-}
 
-class CharacterViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-    private val iv = itemView.findViewById<ImageView>(R.id.ivAvatar)
-    private val tvName = itemView.findViewById<TextView>(R.id.tvName)
-    private val tvMeta = itemView.findViewById<TextView>(R.id.tvMeta)
-    private val tvStatus = itemView.findViewById<TextView>(R.id.tvStatusBadge)
-
-    fun bind(c: CharacterModel) {
-        tvName.text = c.name
-        tvMeta.text = "${c.species} | ${c.gender}"
-        tvStatus.text = c.status
-        // Coil
-        Glide.with(iv.context)
-            .load(c.image)
-            .centerCrop()
-            .into(iv)
+    fun setListener(itemClickListener: ItemClickListener){
+        this.itemClickListener = itemClickListener
     }
+
+
+    fun interface ItemClickListener { fun onItemClick(character: CharacterModel) }
 }

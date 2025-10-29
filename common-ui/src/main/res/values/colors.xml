@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="status_alive">#4CAF50</color> <!-- зелёный -->
+    <color name="status_dead">#F44336</color> <!-- красный -->
+    <color name="status_unknown">#9E9E9E</color> <!-- серый -->
+
+</resources>

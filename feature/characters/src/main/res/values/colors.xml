@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="green">#4CAF50</color>      <!-- Alive -->
-    <color name="red">#F44336</color>        <!-- Dead -->
-    <color name="gray">#9E9E9E</color>       <!-- Unknown -->
-</resources>

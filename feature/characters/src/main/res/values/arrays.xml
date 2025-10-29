@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string-array name="status_options_api">
+        <item>all</item>
+        <item>Alive</item>
+        <item>Dead</item>
+        <item>unknown</item>
+    </string-array>
+
+    <string-array name="status_options_display">
+        <item>Статус</item>
+        <item>Живой</item>
+        <item>Мертвый</item>
+        <item>Неизвестно</item>
+    </string-array>
+
+    <string-array name="species_options_api">
+        <item>all</item>
+        <item>Human</item>
+        <item>Alien</item>
+        <item>Animal</item>
+    </string-array>
+
+    <string-array name="species_options_display">
+        <item>Вид</item>
+        <item>Человек</item>
+        <item>Инопланетянин</item>
+        <item>Животное</item>
+    </string-array>
+
+    <string-array name="gender_options_api">
+        <item>all</item>
+        <item>Male</item>
+        <item>Female</item>
+        <item>Genderless</item>
+        <item>unknown</item>
+    </string-array>
+
+    <string-array name="gender_options_display">
+        <item>Пол</item>
+        <item>Мужской</item>
+        <item>Женский</item>
+        <item>Без пола</item>
+        <item>Неизвестно</item>
+    </string-array>
+
+</resources>

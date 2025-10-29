@@ -9,6 +9,7 @@ import javax.inject.Inject
 class GetCharactersUseCase @Inject constructor(
     private val repository: CharactersRepository
 ) {
+
     operator fun invoke(
         query: String? = null,
         status: String? = null,

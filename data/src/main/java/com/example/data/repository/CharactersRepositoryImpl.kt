@@ -21,6 +21,7 @@ class CharactersRepositoryImpl @Inject constructor(
     private val mapper: CharacterMapper
 ) : CharactersRepository {
 
+
     @OptIn(ExperimentalPagingApi::class)
     override fun getCharactersPaged(
         query: String?,
@@ -28,16 +29,38 @@ class CharactersRepositoryImpl @Inject constructor(
         species: String?,
         gender: String?
     ): Flow<PagingData<CharacterModel>> {
-        val pagingSourceFactory = { db.characterDao().pagingSource(query, status, species, gender) }
+
+        val pagingSourceFactory = {
+            db.characterDao().pagingSource(query, status, species, gender)
+        }
+
         return Pager(
-            config = PagingConfig(pageSize = 20),
+            config = PagingConfig(
+                pageSize = 20,
+                initialLoadSize = 20,
+                prefetchDistance = 5
+            ),
             remoteMediator = CharactersRemoteMediator(api, db, query, status, species, gender),
             pagingSourceFactory = pagingSourceFactory
-        ).flow.map { pd -> pd.map { mapper.entityToDomain(it) } }
+        ).flow.map { pagingData ->
+            pagingData.map { entity ->
+                try {
+                    val domain = mapper.entityToDomain(entity)
+                    domain
+                } catch (e: Exception) {
+                    mapper.entityToDomain(entity)
+                }
+            }
+        }
     }
 
     override suspend fun getCharacterById(id: Int): CharacterModel? {
-        return db.characterDao().getCharacter(id)?.let { mapper.entityToDomain(it) }
+
+        return db.characterDao().getCharacter(id)?.let {
+            val domain = mapper.entityToDomain(it)
+            domain
+        }
     }
 }
+
 

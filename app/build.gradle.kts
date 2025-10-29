@@ -40,15 +40,17 @@ android {
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":domain"))
-    implementation(project(":data"))
+
     implementation(project(":feature:characters"))
     implementation(project(":feature:details"))
+    implementation(project(":common-ui"))
 
     implementation(libs.hilt.android)
     implementation(libs.androidx.appcompat)
     kapt(libs.hilt.compiler)
-
     implementation(libs.androidx.fragment.ktx)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

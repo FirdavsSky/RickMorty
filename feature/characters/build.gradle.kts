@@ -39,12 +39,12 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":domain"))
     implementation(project(":data"))
+    implementation(project(":common-ui"))
+
     implementation(libs.androidx.core.ktx)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.0")
-
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.3")
-
     implementation(libs.hilt.android)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.paging.runtime.ktx)
     kapt(libs.hilt.compiler)
 
@@ -53,10 +53,14 @@ dependencies {
 
 
     // Material
-    implementation("com.google.android.material:material:1.9.0")
+    implementation(libs.material.v190)
 
     implementation(libs.glide)
 
-    implementation("androidx.hilt:hilt-navigation-fragment:1.1.0")
+    implementation(libs.androidx.hilt.navigation.fragment)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
 }
